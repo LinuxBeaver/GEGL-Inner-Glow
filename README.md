@@ -1,4 +1,6 @@
 
+![image preview](inner_glow_preview.png)
+
 You need to build inner-glow.so/dll , sozzwhite.so/dll (white color fill) it.so/dll , (invert transparency) and put them in /gegl-0.4/plug-ins  
 
 If you have my custom 'GEGL cutout' filter you need
