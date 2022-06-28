@@ -63,6 +63,7 @@ property_double (opacity, _("Opacity"), 1.4)
 
 
 property_color  (notouch, _("Don't touch. Needed for filter to work"), "#")
+    ui_meta     ("role", "output-extent")
 
 
 property_color (value2, _("Color"), "#fbff00")
