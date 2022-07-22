@@ -70,6 +70,20 @@ property_color (value2, _("Color"), "#fbff00")
     description (_("The color to paint over the input"))
     ui_meta     ("role", "color-primary")
 
+property_int  (mradius, _("Radius"), 1)
+  value_range (-400, 400)
+  ui_range    (0, 100)
+  ui_meta     ("unit", "pixel-distance")
+  description (_("Neighborhood radius, a negative value will calculate with inverted percentiles"))
+    ui_meta     ("role", "output-extent")
+
+
+property_double  (fixoutline, _("Median to fix unwanted pixel outline"), 50)
+  value_range (50, 100)
+  description (_("Neighborhood alpha percentile"))
+
+
+
 
 
 #else
@@ -83,7 +97,7 @@ property_color (value2, _("Color"), "#fbff00")
 static void attach (GeglOperation *operation)
 {
   GeglNode *gegl = operation->node;
-  GeglNode *input, *it, *shadow, *c2a, *white, *color, *nop, *color2, *eblack, *atop, *output;
+  GeglNode *input, *it, *shadow, *c2a, *white, *color, *nop, *color2, *eblack, *atop, *median, *median2, *output;
 
   input    = gegl_node_get_input_proxy (gegl, "input");
   output   = gegl_node_get_output_proxy (gegl, "output");
@@ -124,6 +138,19 @@ static void attach (GeglOperation *operation)
                                   "operation", "gegl:zzeraseblack",
                                   NULL);
 
+  eblack    = gegl_node_new_child (gegl,
+                                  "operation", "gegl:zzeraseblack",
+                                  NULL);
+
+  median    = gegl_node_new_child (gegl,
+                                  "operation", "gegl:median-blur",
+                                  NULL);
+
+  median2    = gegl_node_new_child (gegl,
+                                  "operation", "gegl:median-blur",
+                                  NULL);
+
+
 
 
 gegl_operation_meta_redirect (operation, "grow_radius", shadow, "grow-radius");
@@ -141,6 +168,11 @@ gegl_operation_meta_redirect (operation, "y", shadow, "y");
 
 gegl_operation_meta_redirect (operation, "notouch", color, "value");
 
+gegl_operation_meta_redirect (operation, "mradius", median, "radius");
+
+gegl_operation_meta_redirect (operation, "fixoutline", median, "alpha-percentile");
+
+gegl_operation_meta_redirect (operation, "fixoutline", median2, "alpha-percentile");
 
 
 
@@ -149,7 +181,13 @@ gegl_operation_meta_redirect (operation, "notouch", color, "value");
 
 
 
-  gegl_node_link_many (input, it, nop, shadow, color, atop, eblack, color2, output, NULL);
+
+
+
+
+
+
+  gegl_node_link_many (input, it, nop, shadow, color, atop, eblack, color2, median, median2, output, NULL);
  gegl_node_connect_from (atop, "aux", nop, "output");
 
 
